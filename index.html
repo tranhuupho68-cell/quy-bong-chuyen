@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="vi" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quỹ Bóng Chuyền</title>
+<style>
+  /* Thiết lập tổng thể và nền giao diện */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding-bottom: 60px;
+  }
+
+  /* Thanh tiêu đề dính (sticky header) */
+  .header {
+    background: #1d4ed8;
+    color: #fff;
+    padding: 12px 14px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+  }
+  .h-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-top {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-top.unlocked {
+    background: #16a34a;
+    border-color: #16a34a;
+  }
+
+  /* Thanh đăng nhập mật khẩu mở khóa quyền chỉnh sửa */
+  #loginBar {
+    background: #1e293b;
+    padding: 10px 12px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #loginBar input {
+    width: 155px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    text-align: center;
+    font-size: 14px;
+  }
+  #loginBar button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* Thanh cập nhật mới nhất */
+  #lastChangeBar {
+    background: #fef9c3;
+    border-bottom: 1px solid #fde047;
+    color: #854d0e;
+    font-size: 12px;
+    padding: 8px 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Khu vực tổng quan 3 chỉ số */
+  .summary {
+    display: flex;
+    background: #fff;
+    padding: 12px 6px;
+    border-bottom: 1px solid #cbd5e1;
+    text-align: center;
+  }
+  .summary div {
+    flex: 1;
+  }
+  .summary small {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 3px;
+  }
+  .summary b {
+    font-size: 16px;
+  }
+
+  /* 4 tab điều hướng */
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .tabs button {
+    flex: 1;
+    padding: 12px 4px;
+    border: none;
+    background: #fff;
+    font-weight: bold;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .tabs button.active {
+    color: #1d4ed8;
+    border-bottom: 3px solid #1d4ed8;
+    background: #eff6ff;
+  }
+
+  /* Vùng nội dung từng tab */
+  .page {
+    display: none;
+    padding: 12px;
+    max-width: 640px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .page.active {
+    display: block;
+  }
+  .card {
+    background: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .row > div {
+    flex: 1;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: #fff;
+    color: #1e293b;
+  }
+  input:disabled, select:disabled {
+    background: #f8fafc;
+    color: #475569;
+  }
+
+  /* Lưới 2 cột 22 thành viên */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .member {
+    border: 1px solid #cbd5e1;
+    padding: 10px 8px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: #fff;
+    user-select: none;
+    min-height: 46px;
+    box-sizing: border-box;
+    gap: 6px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .member:hover {
+    border-color: #93c5fd;
+  }
+  .member.lose {
+    background: #fef2f2;
+    border-color: #f87171;
+  }
+  .m-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+  }
+  .chk {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .member.lose .chk {
+    background: #2563eb;
+    border-color: #2563eb;
+  }
+  .m-name {
+    font-weight: bold;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .m-cnt {
+    font-size: 12px;
+    color: #dc2626;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .m-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .btn-plus {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .badge {
+    padding: 5px 7px;
+    border: none;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .unpaid {
+    background: #dc2626;
+  }
+  .paid {
+    background: #16a34a;
+  }
+
+  /* Nút lưu, sao chép Zalo và danh sách giao dịch */
+  .btn-save {
+    width: 100%;
+    padding: 12px;
+    background: #1d4ed8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .btn-zalo {
+    width: 100%;
+    padding: 10px;
+    background: #0284c7;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+    gap: 8px;
+  }
+  .log-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Bảng công nợ */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  td, th {
+    padding: 10px 5px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Bộ lọc và xếp hạng tab Vinh Danh */
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .filter-btn {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: #1d4ed8;
+    color: #fff;
+    border-color: #1d4ed8;
+  }
+  .rank-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    gap: 8px;
+  }
+  .rank-1 {
+    background: #fefce8;
+    border-color: #facc15;
+  }
+  .rank-2 {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+  .rank-3 {
+    background: #fff7ed;
+    border-color: #fb923c;
+  }
+
+  /* Modal thông báo, xác nhận và sao chép nội dung */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open {
+    display: flex;
+  }
+  .modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    max-width: 390px;
+    width: 100%;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .modal-msg {
+    font-size: 14px;
+    color: #1e293b;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .modal-textarea {
+    width: 100%;
+    height: 165px;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+    resize: none;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .modal-cancel {
+    background: #e2e8f0;
+    color: #334155;
+  }
+  .modal-ok {
+    background: #1d4ed8;
+    color: #fff;
+  }
+  .modal-danger {
+    background: #dc2626;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<!-- Thanh tiêu đề dính (sticky header) -->
+<div class="header">
+  <span>🏐 QUỸ BÓNG CHUYỀN</span>
+  <div class="h-btns">
+    <button type="button" class="btn-top" onclick="syncFromCloud(true)">🔄 Tải mới</button>
+    <button type="button" class="btn-top" id="btnAuth" onclick="toggleAuth()">🔒 Chỉ xem</button>
+  </div>
+</div>
+
+<!-- Thanh đăng nhập mật khẩu mở khóa quyền chỉnh sửa -->
+<div id="loginBar">
+  <input type="password" id="pwInput" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter') doLogin()">
+  <button type="button" style="background:#16a34a;color:#fff" onclick="doLogin()">Mở khóa</button>
+  <button type="button" style="background:#64748b;color:#fff" onclick="closeLoginBar()">Đóng</button>
+</div>
+
+<!-- Thanh cập nhật mới nhất -->
+<div id="lastChangeBar">⏳ Đang tải số liệu quỹ trực tuyến...</div>
+
+<!-- Khu vực tổng quan 3 chỉ số -->
+<div class="summary">
+  <div><small>Đã Thu</small><b style="color:#16a34a" id="vIn">0đ</b></div>
+  <div><small>Đã Chi</small><b style="color:#dc2626" id="vOut">0đ</b></div>
+  <div><small>Còn Lại</small><b style="color:#1d4ed8" id="vBal">0đ</b></div>
+</div>
+
+<!-- 4 tab điều hướng -->
+<div class="tabs">
+  <button type="button" id="t1" class="active" onclick="openTab(1)">📅 Đánh Thua</button>
+  <button type="button" id="t2" onclick="openTab(2)">💰 Thu / Chi</button>
+  <button type="button" id="t3" onclick="openTab(3)">📊 Công Nợ</button>
+  <button type="button" id="t4" onclick="openTab(4)">🏆 Vinh Danh</button>
+</div>
+
+<!-- Tab 1: Đánh Thua -->
+<div id="p1" class="page active">
+  <div class="card">
+    <div class="row" style="margin-bottom:0">
+      <div>
+        <small style="color:#475569;display:block;margin-bottom:4px">Ngày đánh</small>
+        <input type="date" id="mDate" onchange="refreshDay()">
+      </div>
+      <div>
+        <small style="color:#475569;display:block;margin-bottom:4px">Tiền thua/người</small>
+        <input type="number" id="mFee" value="50000" disabled onchange="updateFee()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+      <span>Danh sách thành viên (22)</span>
+      <span id="dayInfo" style="color:#1d4ed8;font-size:12px"></span>
+    </div>
+    <div class="grid" id="mGrid"></div>
+  </div>
+</div>
+
+<!-- Tab 2: Thu / Chi -->
+<div id="p2" class="page">
+  <div class="card" id="trFormCard" style="display:none">
+    <div class="row">
+      <div>
+        <select id="trType" onchange="toggleDonorBox()">
+          <option value="out">Chi tiêu (Nước, sân...)</option>
+          <option value="in">Ủng hộ / Đóng quỹ</option>
+        </select>
+      </div>
+      <div>
+        <input type="number" id="trAmt" placeholder="Số tiền (VNĐ)">
+      </div>
+    </div>
+    <div class="row" id="donorRow" style="display:none">
+      <div>
+        <select id="trPerson">
+          <option value="">-- Chọn người đóng / ủng hộ --</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div><input type="date" id="trDate"></div>
+      <div><input type="text" id="trNote" placeholder="Nội dung (VD: Mua nước / Ủng hộ)"></div>
+    </div>
+    <button type="button" class="btn-save" onclick="saveTr()">+ Lưu Khoản Này</button>
+  </div>
+  <div class="card">
+    <div id="trList"><div style="text-align:center;color:#64748b">Chưa có giao dịch</div></div>
+  </div>
+</div>
+
+<!-- Tab 3: Công Nợ -->
+<div id="p3" class="page">
+  <div class="card">
+    <button type="button" class="btn-zalo" onclick="copyZaloReport()">📋 Sao chép báo cáo gửi nhóm Zalo</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Tên</th>
+          <th style="text-align:center">Thua</th>
+          <th style="text-align:right">Đã nộp</th>
+          <th style="text-align:right">Còn nợ</th>
+        </tr>
+      </thead>
+      <tbody id="dBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tab 4: Vinh Danh -->
+<div id="p4" class="page">
+  <div class="card">
+    <div style="font-weight:bold;margin-bottom:8px;color:#1d4ed8;text-align:center">🏆 BẢNG VÀNG ĐÓNG GÓP QUỸ</div>
+    <div class="filter-bar">
+      <button type="button" id="fWeek" class="filter-btn active" onclick="setHonorFilter('week')">Tuần này</button>
+      <button type="button" id="fMonth" class="filter-btn" onclick="setHonorFilter('month')">Tháng này</button>
+      <button type="button" id="fAll" class="filter-btn" onclick="setHonorFilter('all')">Tất cả</button>
+    </div>
+    <div id="honorList"></div>
+  </div>
+</div>
+
+<!-- Modal thông báo / xác nhận / sao chép không gây kẹt giao diện -->
+<div id="uiModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div id="uiModalMsg" class="modal-msg"></div>
+    <textarea id="uiModalText" class="modal-textarea" style="display:none" readonly></textarea>
+    <div id="uiModalActions" class="modal-actions"></div>
+  </div>
+</div>
+
+<script translate="no">
+  // 1. Cấu hình JSONBin v3 trực tiếp
+  var BIN_ID = "6afe917dffd5d16053cdaf3b";
+  var API_KEY = "$2a$10$2NTqyeUSdqNuaXLzZuEfkOqXEZlShaaJdAO7HNCAHMovCsngMc0UW";
+  var ADMIN_PASS = "1111";
+  var API_URL = ["https:/", "api.jsonbin.io", "v3", "b", BIN_ID].join("/");
+
+  // 2. Danh sách 22 thành viên cố định
+  var NAMES = "Tuấn,Thành,Tính,Hiếu,Hạnh,Phố,Anh Hiếu,Biên,Cường,Hưng,Hoàng,Sửu,Đức TL,Đức GL,Hiệp,Tấn,Huy,Đức ĐN,Nhân,Kỳ,Huỳnh,Phúc".split(",");
+
+  var dayMap = new Map();
+  var transList = [];
+  var lastLog = "Khởi tạo sổ quỹ đội bóng chuyền";
+  var honorPeriod = "week";
+  var isAdmin = false;
+  var LOCAL_BACKUP_KEY = "vb22_jsonbin_v3_backup";
+
+  // Hiển thị modal thông báo, xác nhận hoặc sao chép văn bản trên trang
+  function showUiModal(message, options) {
+    options = options || {};
+    var backdrop = document.getElementById("uiModal");
+    var msgEl = document.getElementById("uiModalMsg");
+    var textEl = document.getElementById("uiModalText");
+    var actEl = document.getElementById("uiModalActions");
+
+    msgEl.textContent = message;
+    actEl.innerHTML = "";
+
+    if (options.copyText !== undefined) {
+      textEl.style.display = "block";
+      textEl.value = options.copyText;
+    } else {
+      textEl.style.display = "none";
+      textEl.value = "";
+    }
+
+    if (options.confirm) {
+      var cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "modal-btn modal-cancel";
+      cancelBtn.textContent = "Hủy";
+      cancelBtn.onclick = function() {
+        backdrop.classList.remove("open");
+      };
+
+      var okBtn = document.createElement("button");
+      okBtn.type = "button";
+      okBtn.className = "modal-btn modal-danger";
+      okBtn.textContent = options.okText || "Xóa";
+      okBtn.onclick = function() {
+        backdrop.classList.remove("open");
+        if (typeof options.onConfirm === "function") {
+          options.onConfirm();
+        }
+      };
+
+      actEl.appendChild(cancelBtn);
+      actEl.appendChild(okBtn);
+    } else {
+      var closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "modal-btn modal-ok";
+      closeBtn.textContent = "Đóng";
+      closeBtn.onclick = function() {
+        backdrop.classList.remove("open");
+      };
+      actEl.appendChild(closeBtn);
+    }
+
+    backdrop.classList.add("open");
+  }
+
+  // Xử lý đăng nhập mật khẩu (mặc định 1111)
+  function doLogin() {
+    var pw = document.getElementById("pwInput").value;
+    if (pw === ADMIN_PASS) {
+      isAdmin = true;
+      closeLoginBar();
+      applyAuthUI();
+      updateLogBanner("Đã mở khóa quyền chỉnh sửa lúc " + nowTimeStr());
+    } else {
+      showUiModal("Mật khẩu không đúng. Vui lòng thử lại.");
+    }
+  }
+
+  // Định dạng tiền VNĐ
+  function money(v) {
+    return (Number(v) || 0).toLocaleString("vi-VN") + "đ";
+  }
+
+  // Lấy ngày hiện tại dạng YYYY-MM-DD
+  function getToday() {
+    var d = new Date();
+    var p = function(n) { return n < 10 ? "0" + n : String(n); };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+
+  // Lấy thời gian hiện tại dạng HH:MM ngày DD/MM
+  function nowTimeStr() {
+    var d = new Date();
+    var p = function(n) { return n < 10 ? "0" + n : String(n); };
+    return p(d.getHours()) + ":" + p(d.getMinutes()) + " ngày " + p(d.getDate()) + "/" + p(d.getMonth() + 1);
+  }
+
+  // Cập nhật thanh ghi nhận thay đổi gần nhất (#lastChangeBar)
+  function updateLogBanner(msg) {
+    lastLog = msg || lastLog;
+    document.getElementById("lastChangeBar").innerHTML = "🔔 <b>Cập nhật mới nhất:</b> " + lastLog;
+  }
+
+  // Khởi tạo danh sách chọn người đóng/ủng hộ ở Tab Thu / Chi
+  function populateDonorSelect() {
+    var sel = document.getElementById("trPerson");
+    if (!sel) return;
+    var html = '<option value="">-- Chọn người đóng / ủng hộ --</option>';
+    NAMES.forEach(function(name) {
+      html += '<option value="' + name + '">' + name + '</option>';
+    });
+    sel.innerHTML = html;
+  }
+
+  // Hiện/ẩn ô chọn người đóng/ủng hộ khi đổi loại giao dịch
+  function toggleDonorBox() {
+    var type = document.getElementById("trType").value;
+    document.getElementById("donorRow").style.display = (type === "in") ? "flex" : "none";
+  }
+
+  // Đóng thanh đăng nhập mật khẩu
+  function closeLoginBar() {
+    document.getElementById("loginBar").style.display = "none";
+    document.getElementById("pwInput").value = "";
+  }
+
+  // Mở/đóng thanh mật khẩu hoặc khóa lại chế độ Chỉ xem
+  function toggleAuth() {
+    if (isAdmin) {
+      isAdmin = false;
+      closeLoginBar();
+      applyAuthUI();
+    } else {
+      var bar = document.getElementById("loginBar");
+      var isOpen = bar.style.display === "flex";
+      bar.style.display = isOpen ? "none" : "flex";
+      if (!isOpen) {
+        var inp = document.getElementById("pwInput");
+        inp.value = "";
+        inp.focus();
+      }
+    }
+  }
+
+  // Áp dụng giao diện theo trạng thái khóa / mở khóa
+  function applyAuthUI() {
+    var btn = document.getElementById("btnAuth");
+    if (isAdmin) {
+      btn.textContent = "🔓 Đang mở khóa";
+      btn.className = "btn-top unlocked";
+    } else {
+      btn.textContent = "🔒 Chỉ xem";
+      btn.className = "btn-top";
+    }
+    document.getElementById("mFee").disabled = !isAdmin;
+    document.getElementById("trFormCard").style.display = isAdmin ? "block" : "none";
+    refreshDay();
+    showTr();
+  }
+
+  // Chuyển đổi dữ liệu thành object chuẩn để lưu localStorage và JSONBin
+  function serializePayload() {
+    var arrM = [];
+    dayMap.forEach(function(val, key) {
+      arrM.push({
+        k: key,
+        f: Number(val.f) || 50000,
+        l: Array.from(val.l.entries())
+      });
+    });
+    return {
+      dayArr: arrM,
+      transList: transList,
+      lastLog: lastLog
+    };
+  }
+
+  // Nạp dữ liệu từ object vào state ứng dụng
+  function hydratePayload(rawData) {
+    dayMap.clear();
+    if (rawData && Array.isArray(rawData.dayArr)) {
+      rawData.dayArr.forEach(function(pair) {
+        if (!pair || !pair.k) return;
+        var innerMap = new Map();
+        if (Array.isArray(pair.l)) {
+          pair.l.forEach(function(item) {
+            if (Array.isArray(item) && item[0] && item[1]) {
+              innerMap.set(item[0], {
+                lose: Number(item[1].lose) || 0,
+                paid: item[1].paid ? 1 : 0
+              });
+            }
+          });
+        }
+        dayMap.set(pair.k, {
+          f: Number(pair.f) || 50000,
+          l: innerMap
+        });
+      });
+    }
+    transList = (rawData && Array.isArray(rawData.transList)) ? rawData.transList : [];
+    if (rawData && typeof rawData.lastLog === "string" && rawData.lastLog.trim()) {
+      lastLog = rawData.lastLog;
+    }
+    updateLogBanner(lastLog);
+  }
+
+  // Lưu bản sao dự phòng vào localStorage
+  function saveLocalBackup() {
+    try {
+      window.localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(serializePayload()));
+    } catch (e) {
+      // Bỏ qua lỗi lưu trữ trình duyệt nếu đầy bộ nhớ
+    }
+  }
+
+  // Đọc bản sao dự phòng từ localStorage
+  function readLocalBackup() {
+    try {
+      var raw = window.localStorage.getItem(LOCAL_BACKUP_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Đẩy dữ liệu lên JSONBin v3 và lưu dự phòng localStorage
+  function pushCloud() {
+    saveLocalBackup();
+    updateLogBanner(lastLog);
+    if (!BIN_ID || !API_KEY) return;
+
+    fetch(API_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": API_KEY
+      },
+      body: JSON.stringify(serializePayload())
+    })
+      .then(function(res) {
+        if (!res.ok) throw new Error("PUT failed");
+        return res.json();
+      })
+      .catch(function() {
+        // Đã lưu dự phòng localStorage an toàn nếu mất mạng tạm thời
+      });
+  }
+
+  // Đồng bộ dữ liệu từ JSONBin v3 (/latest) hoặc dự phòng localStorage
+  function syncFromCloud(showAlert) {
+    var applyAllViews = function() {
+      updateTop();
+      refreshDay();
+      showTr();
+      showDebt();
+      renderHonor();
+    };
+
+    if (!BIN_ID || !API_KEY) {
+      var localOnly = readLocalBackup();
+      if (localOnly) hydratePayload(localOnly);
+      else updateLogBanner(lastLog);
+      applyAllViews();
+      if (showAlert) showUiModal("Đã tải dữ liệu từ bộ nhớ thiết bị.");
+      return;
+    }
+
+    fetch(API_URL + "/latest", {
+      method: "GET",
+      headers: {
+        "X-Master-Key": API_KEY
+      }
+    })
+      .then(function(res) {
+        if (!res.ok) throw new Error("GET failed");
+        return res.json();
+      })
+      .then(function(json) {
+        var rec = (json && json.record) ? json.record : json;
+        hydratePayload(rec);
+        saveLocalBackup();
+        applyAllViews();
+        if (showAlert) {
+          showUiModal("Đã đồng bộ dữ liệu mới nhất từ JSONBin!");
+        }
+      })
+      .catch(function() {
+        var backup = readLocalBackup();
+        if (backup) {
+          hydratePayload(backup);
+        } else {
+          updateLogBanner(lastLog + " (Đang dùng dữ liệu trống)");
+        }
+        applyAllViews();
+        if (showAlert) {
+          showUiModal("Không kết nối được JSONBin. Đang hiển thị dữ liệu dự phòng trên máy và đủ 22 thành viên.");
+        }
+      });
+  }
+
+  // Chuyển đổi 4 tab
+  function openTab(n) {
+    for (var i = 1; i <= 4; i++) {
+      document.getElementById("t" + i).className = (n === i) ? "active" : "";
+      document.getElementById("p" + i).className = (n === i) ? "page active" : "page";
+    }
+    if (n === 1) refreshDay();
+    if (n === 2) showTr();
+    if (n === 3) showDebt();
+    if (n === 4) renderHonor();
+  }
+
+  // LUÔN render đầy đủ 22 thẻ .member vào #mGrid trong mọi trạng thái
+  function renderMembersGrid(dt, losers) {
+    var grid = document.getElementById("mGrid");
+    if (!grid) return;
+
+    var html = "";
+    var totalLose = 0;
+
+    NAMES.forEach(function(name) {
+      var safeName = name.replace(/'/g, "\\'");
+      var info = losers.get(name);
+      var loseCount = (info && Number(info.lose) > 0) ? Number(info.lose) : 0;
+      var isPaid = Boolean(info && info.paid);
+      var isLose = loseCount > 0;
+
+      if (isLose) {
+        totalLose += loseCount;
+      }
+
+      var memberClass = isLose ? "member lose" : "member";
+      var chkMark = isLose ? "✓" : "";
+      var cntHtml = loseCount > 1 ? '<span class="m-cnt">x' + loseCount + '</span>' : "";
+      var disAttr = isAdmin ? "" : " disabled";
+
+      var rightHtml = "";
+      if (isLose) {
+        var badgeClass = isPaid ? "badge paid" : "badge unpaid";
+        var badgeText = isPaid ? "Đã nộp" : "Chưa nộp";
+        rightHtml =
+          '<button type="button" class="btn-plus" onclick="plusLose(event, \'' + safeName + '\')"' + disAttr + '>+1</button>' +
+          '<button type="button" class="' + badgeClass + '" onclick="tapPay(event, \'' + safeName + '\')"' + disAttr + '>' + badgeText + '</button>';
+      }
+
+      html +=
+        '<div class="' + memberClass + '" data-name="' + name + '" data-date="' + dt + '" onclick="toggleMember(this)">' +
+          '<div class="m-left">' +
+            '<span class="chk">' + chkMark + '</span>' +
+            '<span class="m-name">' + name + '</span>' +
+            cntHtml +
+          '</div>' +
+          '<div class="m-right">' + rightHtml + '</div>' +
+        '</div>';
+    });
+
+    grid.innerHTML = html;
+    document.getElementById("dayInfo").textContent = "Tổng thua: " + totalLose + " trận";
+  }
+
+  // Làm mới dữ liệu ngày đánh và render đủ 22 thành viên
+  function refreshDay() {
+    var dt = document.getElementById("mDate").value || getToday();
+    var rec = dayMap.get(dt);
+    var fee = rec ? (Number(rec.f) || 50000) : (Number(document.getElementById("mFee").value) || 50000);
+    document.getElementById("mFee").value = fee;
+    var losers = (rec && rec.l instanceof Map) ? rec.l : new Map();
+
+    renderMembersGrid(dt, losers);
+  }
+
+  // Tích chọn / bỏ chọn thành viên thua trận
+  function toggleMember(el) {
+    if (!isAdmin) {
+      var bar = document.getElementById("loginBar");
+      bar.style.display = "flex";
+      showUiModal("Đang ở chế độ Chỉ xem. Vui lòng nhập mật khẩu ở thanh mở khóa để tích chọn thành viên.");
+      return;
+    }
+
+    var dt = document.getElementById("mDate").value || getToday();
+    var fee = Number(document.getElementById("mFee").value) || 50000;
+    var name = el.getAttribute("data-name");
+    if (!name) return;
+
+    if (!dayMap.has(dt)) {
+      dayMap.set(dt, { f: fee, l: new Map() });
+    }
+    var rec = dayMap.get(dt);
+    if (rec.l.has(name)) {
+      rec.l.delete(name);
+      if (rec.l.size === 0) {
+        dayMap.delete(dt);
+      }
+      lastLog = "Bỏ đánh thua " + name + " ngày " + dt + " lúc " + nowTimeStr();
+    } else {
+      rec.l.set(name, { lose: 1, paid: 0 });
+      lastLog = name + " thua 1 trận ngày " + dt + " lúc " + nowTimeStr();
+    }
+
+    updateTop();
+    refreshDay();
+    pushCloud();
+  }
+
+  // Tăng thêm 1 trận thua cho thành viên
+  function plusLose(e, name) {
+    e.stopPropagation();
+    if (!isAdmin) {
+      document.getElementById("loginBar").style.display = "flex";
+      showUiModal("Vui lòng nhập mật khẩu để tăng số trận thua.");
+      return;
+    }
+    var dt = document.getElementById("mDate").value || getToday();
+    var rec = dayMap.get(dt);
+    if (!rec || !rec.l.has(name)) return;
+
+    var cur = rec.l.get(name);
+    cur.lose = (Number(cur.lose) || 0) + 1;
+    rec.l.set(name, cur);
+    lastLog = name + " tăng thành " + cur.lose + " trận thua ngày " + dt + " lúc " + nowTimeStr();
+
+    updateTop();
+    refreshDay();
+    pushCloud();
+  }
+
+  // Chuyển trạng thái nộp tiền ("Chưa nộp" <-> "Đã nộp")
+  function tapPay(e, name) {
+    e.stopPropagation();
+    if (!isAdmin) {
+      document.getElementById("loginBar").style.display = "flex";
+      showUiModal("Vui lòng nhập mật khẩu để cập nhật trạng thái nộp tiền.");
+      return;
+    }
+    var dt = document.getElementById("mDate").value || getToday();
+    var rec = dayMap.get(dt);
+    if (!rec || !rec.l.has(name)) return;
+
+    var cur = rec.l.get(name);
+    cur.paid = cur.paid ? 0 : 1;
+    rec.l.set(name, cur);
+    lastLog = name + (cur.paid ? " đã nộp tiền thua" : " hủy trạng thái nộp") + " ngày " + dt + " lúc " + nowTimeStr();
+
+    updateTop();
+    refreshDay();
+    pushCloud();
+  }
+
+  // Cập nhật mức tiền thua cho ngày đang chọn
+  function updateFee() {
+    if (!isAdmin) return;
+    var dt = document.getElementById("mDate").value || getToday();
+    var fee = Number(document.getElementById("mFee").value) || 0;
+    if (fee < 0) fee = 0;
+    document.getElementById("mFee").value = fee;
+    if (dayMap.has(dt)) {
+      dayMap.get(dt).f = fee;
+      lastLog = "Cập nhật tiền thua " + money(fee) + " ngày " + dt + " lúc " + nowTimeStr();
+      updateTop();
+      pushCloud();
+    }
+  }
+
+  // Lưu khoản Thu / Chi mới
+  function saveTr() {
+    if (!isAdmin) {
+      showUiModal("Vui lòng mở khóa mật khẩu để thêm khoản Thu / Chi.");
+      return;
+    }
+    var type = document.getElementById("trType").value;
+    var amt = Number(document.getElementById("trAmt").value);
+    var person = (type === "in") ? document.getElementById("trPerson").value : "";
+    var dt = document.getElementById("trDate").value || getToday();
+    var note = document.getElementById("trNote").value.trim() || (type === "in" ? "Đóng quỹ / Ủng hộ" : "Chi tiêu");
+
+    if (!amt || amt <= 0) {
+      showUiModal("Vui lòng nhập số tiền hợp lệ lớn hơn 0.");
+      return;
+    }
+
+    transList.unshift({
+      id: Date.now(),
+      type: type,
+      amt: amt,
+      person: person,
+      dt: dt,
+      note: note
+    });
+
+    document.getElementById("trAmt").value = "";
+    document.getElementById("trNote").value = "";
+    document.getElementById("trPerson").value = "";
+
+    var whoText = person ? (" (" + person + ")") : "";
+    lastLog = (type === "in" ? "Thu " : "Chi ") + money(amt) + whoText + " - " + note + " lúc " + nowTimeStr();
+
+    updateTop();
+    showTr();
+    showDebt();
+    renderHonor();
+    pushCloud();
+  }
+
+  // Xóa giao dịch thu/chi sau khi xác nhận qua modal
+  function delTr(id) {
+    if (!isAdmin) {
+      showUiModal("Vui lòng mở khóa mật khẩu để xóa giao dịch.");
+      return;
+    }
+    showUiModal("Bạn có chắc muốn xóa giao dịch này không?", {
+      confirm: true,
+      okText: "Xóa",
+      onConfirm: function() {
+        transList = transList.filter(function(item) { return item.id !== id; });
+        lastLog = "Xóa 1 khoản thu/chi lúc " + nowTimeStr();
+        updateTop();
+        showTr();
+        showDebt();
+        renderHonor();
+        pushCloud();
+      }
+    });
+  }
+
+  // Hiển thị danh sách Thu / Chi
+  function showTr() {
+    var box = document.getElementById("trList");
+    if (!box) return;
+    if (transList.length === 0) {
+      box.innerHTML = '<div style="text-align:center;color:#64748b">Chưa có giao dịch</div>';
+      return;
+    }
+
+    var html = "";
+    transList.forEach(function(t) {
+      var isIn = t.type === "in";
+      var color = isIn ? "#16a34a" : "#dc2626";
+      var sign = isIn ? "+" : "-";
+      var personBadge = t.person ? ' • <b style="color:#1d4ed8">' + t.person + '</b>' : "";
+      var delBtn = isAdmin ? '<small style="color:#dc2626;cursor:pointer;font-weight:bold" onclick="delTr(' + t.id + ')">Xóa</small>' : "";
+
+      html +=
+        '<div class="log-item">' +
+          '<div><b>' + t.note + '</b><br><small style="color:#64748b">' + t.dt + personBadge + '</small></div>' +
+          '<div style="text-align:right">' +
+            '<b style="color:' + color + '">' + sign + money(t.amt) + '</b><br>' +
+            delBtn +
+          '</div>' +
+        '</div>';
+    });
+    box.innerHTML = html;
+  }
+
+  // Kiểm tra ngày có nằm trong khoảng lọc ("week", "month", "all")
+  function isInPeriod(dateStr, period) {
+    if (period === "all" || !dateStr) return true;
+    var parts = dateStr.split("-");
+    if (parts.length < 3) return true;
+    var target = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    var now = new Date();
+    var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (period === "month") {
+      return target.getFullYear() === todayStart.getFullYear() && target.getMonth() === todayStart.getMonth();
+    }
+    if (period === "week") {
+      var dayOfWeek = todayStart.getDay();
+      var diffToMon = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+      var mon = new Date(todayStart);
+      mon.setDate(todayStart.getDate() - diffToMon);
+      var sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+      return target >= mon && target <= sun;
+    }
+    return true;
+  }
+
+  // Tổng hợp số liệu từng thành viên theo giai đoạn
+  function getMemberSummary(period) {
+    var map = {};
+    NAMES.forEach(function(n) {
+      map[n] = { loseCount: 0, paidLoseAmt: 0, debtAmt: 0, extraInAmt: 0, totalContrib: 0 };
+    });
+
+    dayMap.forEach(function(rec, dt) {
+      if (!isInPeriod(dt, period)) return;
+      rec.l.forEach(function(info, name) {
+        if (!map[name]) return;
+        var lose = Number(info.lose) || 0;
+        var amt = lose * (Number(rec.f) || 50000);
+        map[name].loseCount += lose;
+        if (info.paid) {
+          map[name].paidLoseAmt += amt;
+          map[name].totalContrib += amt;
+        } else {
+          map[name].debtAmt += amt;
+        }
+      });
+    });
+
+    transList.forEach(function(t) {
+      if (t.type === "in" && t.person && map[t.person] && isInPeriod(t.dt, period)) {
+        var amount = Number(t.amt) || 0;
+        map[t.person].extraInAmt += amount;
+        map[t.person].totalContrib += amount;
+      }
+    });
+
+    return map;
+  }
+
+  // Render bảng Công Nợ cho đủ 22 thành viên
+  function showDebt() {
+    var tbody = document.getElementById("dBody");
+    if (!tbody) return;
+    var stats = getMemberSummary("all");
+    var html = "";
+
+    NAMES.forEach(function(n) {
+      var s = stats[n];
+      var debtColor = s.debtAmt > 0 ? "#dc2626" : "#64748b";
+      html +=
+        '<tr>' +
+          '<td><b>' + n + '</b></td>' +
+          '<td style="text-align:center">' + s.loseCount + '</td>' +
+          '<td style="text-align:right;color:#16a34a">' + money(s.paidLoseAmt) + '</td>' +
+          '<td style="text-align:right;font-weight:bold;color:' + debtColor + '">' + money(s.debtAmt) + '</td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  // Sao chép báo cáo gửi nhóm Zalo (có fallback modal văn bản)
+  function copyZaloReport() {
+    var stats = getMemberSummary("all");
+    var vIn = document.getElementById("vIn").textContent;
+    var vOut = document.getElementById("vOut").textContent;
+    var vBal = document.getElementById("vBal").textContent;
+
+    var lines = [
+      "🏐 TỔNG KẾT QUỸ BÓNG CHUYỀN",
+      "• Đã thu: " + vIn,
+      "• Đã chi: " + vOut,
+      "• Còn lại: " + vBal,
+      "📌 DANH SÁCH CÒN NỢ:"
+    ];
+
+    var anyDebt = false;
+    NAMES.forEach(function(n) {
+      if (stats[n].debtAmt > 0) {
+        anyDebt = true;
+        lines.push("- " + n + ": " + money(stats[n].debtAmt) + " (" + stats[n].loseCount + " trận thua)");
+      }
+    });
+    if (!anyDebt) {
+      lines.push("- Tất cả đã hoàn tất tiền thua ✅");
+    }
+
+    var text = lines.join("\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showUiModal("Đã sao chép báo cáo vào bộ nhớ tạm để dán lên Zalo!");
+      }).catch(function() {
+        showUiModal("Hãy sao chép nội dung báo cáo dưới đây để gửi Zalo:", { copyText: text });
+      });
+    } else {
+      showUiModal("Hãy sao chép nội dung báo cáo dưới đây để gửi Zalo:", { copyText: text });
+    }
+  }
+
+  // Đổi bộ lọc Tuần này / Tháng này / Tất cả ở Tab Vinh Danh
+  function setHonorFilter(p) {
+    honorPeriod = p;
+    document.getElementById("fWeek").className = (p === "week") ? "filter-btn active" : "filter-btn";
+    document.getElementById("fMonth").className = (p === "month") ? "filter-btn active" : "filter-btn";
+    document.getElementById("fAll").className = (p === "all") ? "filter-btn active" : "filter-btn";
+    renderHonor();
+  }
+
+  // Render bảng xếp hạng đóng góp quỹ ở Tab Vinh Danh
+  function renderHonor() {
+    var box = document.getElementById("honorList");
+    if (!box) return;
+    var stats = getMemberSummary(honorPeriod);
+
+    var ranked = NAMES.map(function(n) {
+      var s = stats[n];
+      return {
+        name: n,
+        totalContrib: s.totalContrib,
+        loseCount: s.loseCount,
+        extraInAmt: s.extraInAmt
+      };
+    }).filter(function(item) { return item.totalContrib > 0; })
+      .sort(function(a, b) { return b.totalContrib - a.totalContrib; });
+
+    if (ranked.length === 0) {
+      box.innerHTML = '<div style="text-align:center;color:#64748b;padding:14px">Chưa có đóng góp quỹ trong giai đoạn này.</div>';
+      return;
+    }
+
+    var html = "";
+    ranked.forEach(function(item, idx) {
+      var cls = idx === 0 ? "rank-1" : (idx === 1 ? "rank-2" : (idx === 2 ? "rank-3" : ""));
+      var medal = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : "#" + (idx + 1)));
+      var notes = [];
+      if (item.loseCount > 0) notes.push(item.loseCount + " trận thua");
+      if (item.extraInAmt > 0) notes.push("ủng hộ " + money(item.extraInAmt));
+      var subHtml = notes.length > 0 ? "<br><small style='color:#64748b'>" + notes.join(" • ") + "</small>" : "";
+
+      html +=
+        '<div class="rank-item ' + cls + '">' +
+          '<div><b>' + medal + ' ' + item.name + '</b>' + subHtml + '</div>' +
+          '<div style="color:#16a34a;font-weight:bold">' + money(item.totalContrib) + '</div>' +
+        '</div>';
+    });
+
+    box.innerHTML = html;
+  }
+
+  // Cập nhật 3 chỉ số tổng quan: Đã Thu / Đã Chi / Còn Lại
+  function updateTop() {
+    var totalIn = 0;
+    var totalOut = 0;
+
+    dayMap.forEach(function(rec) {
+      var fee = Number(rec.f) || 50000;
+      rec.l.forEach(function(info) {
+        if (info.paid) {
+          totalIn += (Number(info.lose) || 0) * fee;
+        }
+      });
+    });
+
+    transList.forEach(function(t) {
+      var amt = Number(t.amt) || 0;
+      if (t.type === "in") totalIn += amt;
+      else totalOut += amt;
+    });
+
+    document.getElementById("vIn").textContent = money(totalIn);
+    document.getElementById("vOut").textContent = money(totalOut);
+    document.getElementById("vBal").textContent = money(totalIn - totalOut);
+  }
+
+  // Khởi tạo ứng dụng khi tải trang
+  (function initApp() {
+    populateDonorSelect();
+    document.getElementById("mDate").value = getToday();
+    document.getElementById("trDate").value = getToday();
+    applyAuthUI();
+    syncFromCloud(false);
+  })();
+</script>
+</body>
+</html>
