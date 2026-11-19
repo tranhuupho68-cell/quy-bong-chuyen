@@ -717,42 +717,36 @@
       document.body.removeChild(ta);
     } catch (e) {}
 
-    if (copied) {
-      showDialog("Đã sao chép báo cáo vào bộ nhớ tạm! Bạn có thể dán trực tiếp lên nhóm Zalo.");
-    } else {
-      showDialog("Bấm giữ và sao chép nội dung báo cáo bên dưới:", { copyText: text });
-    }
+      var BIN_ID = "";
+  var API_KEY = "$2a$10$2NTqyeUSdqNuaXLzZuEfkOqXEZlShaaJdAO7HNCAHMovCsngMc0UW";
+  var ADMIN_PASS = "1111";
+
+  function getSavedBin() {
+    if (BIN_ID && BIN_ID.length > 10) return BIN_ID;
+    try { return localStorage.getItem("vb22_auto_bin") || ""; } catch (e) { return ""; }
   }
 
-  /* Bộ lọc Tab Vinh Danh */
-  function setHonorFilter(mode) {
-    honorFilter = mode;
-    document.getElementById("fAll").className = (mode === "all") ? "filter-btn active" : "filter-btn";
-    document.getElementById("fMonth").className = (mode === "month") ? "filter-btn active" : "filter-btn";
-    renderHonor();
+  function createAutoBin() {
+    fetch("https://jsonbin.io", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": API_KEY,
+        "X-Bin-Name": "QuyBongChuyen22",
+        "X-Bin-Private": "false"
+      },
+      body: JSON.stringify({ m: [], t: [], log: "Khởi tạo sổ quỹ" })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(j) {
+      if (j && j.metadata && j.metadata.id) {
+        var newId = j.metadata.id;
+        try { localStorage.setItem("vb22_auto_bin", newId); } catch (e) {}
+        alert("✅ ĐÃ TẠO KHO ONLINE THÀNH CÔNG!\n\nMã BIN_ID của bạn là:\n" + newId + "\n\nHãy copy mã này dán vào dòng var BIN_ID = \"" + newId + "\"; trên GitHub để cả đội dùng chung nhé!");
+      }
+    });
   }
 
-  /* Hiển thị Top 5 Bơm Quỹ và Gương Sáng Đóng Tiền Đúng Hẹn */
-  function renderHonor() {
-    var stats = calcStats(honorFilter === "month");
-
-    var byLose = NAMES.map(function(n) {
-      return { name: n, lose: stats[n].loseCount, paidAmt: stats[n].paidAmt, debtAmt: stats[n].debtAmt };
-    }).filter(function(x) { return x.lose > 0; })
-      .sort(function(a, b) { return b.lose - a.lose; })
-      .slice(0, 5);
-
-    var loseHtml = "";
-    if (byLose.length === 0) {
-      loseHtml = '<div style="color:#64748b;font-size:13px">Chưa có dữ liệu trận thua.</div>';
-    } else {
-      byLose.forEach(function(item, idx) {
-        var rankCls = idx === 0 ? "rank-1" : (idx === 1 ? "rank-2" : (idx === 2 ? "rank-3" : ""));
-        var medal = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : "#" + (idx + 1)));
-        loseHtml += '<div class="rank-item ' + rankCls + '">' +
-          '<div><b>' + medal + ' ' + item.name + '</b></div>' +
-          '<div style="color:#dc2626;font-weight:bold">' + item.lose + ' trận (' + money(item.paidAmt + item.debtAmt) + ')</div>' +
-        '</div>';
       });
     }
     document.getElementById("honorLoseList").innerHTML = loseHtml;
