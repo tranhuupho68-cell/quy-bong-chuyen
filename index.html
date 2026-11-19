@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quỹ Bóng Chuyền</title>
 <style>
@@ -127,7 +128,7 @@
     <div id="honorList"></div>
   </div>
 </div>
-<script>
+<script translate="no">
   var BIN_ID = "";
   var API_KEY = "$2a$10$2NTqyeUSdqNuaXLzZuEfkOqXEZlShaaJdAO7HNCAHMovCsngMc0UW";
   var ADMIN_PASS = "1111";
@@ -268,58 +269,3 @@
   }
   function saveTr() {
     if (!isAdmin) return; var amt = Number(document.getElementById("trAmt").value); if (!amt || amt <= 0) { alert("Nhập số tiền!"); return; }
-    var type = document.getElementById("trType").value, person = (type === "in") ? document.getElementById("trPerson").value : "";
-    var dt = document.getElementById("trDate").value || getToday(), raw = document.getElementById("trNote").value.trim();
-    var note = raw || (type === "in" ? (person ? person + " ủng hộ" : "Thu quỹ") : "Chi tiêu");
-    if (type === "in" && person && raw) note = person + " - " + raw;
-    transList.unshift({ type: type, person: person, amt: amt, dt: dt, note: note });
-    document.getElementById("trAmt").value = ""; document.getElementById("trNote").value = "";
-    storeData((type === "in" ? "Thu +" : "Chi -") + money(amt) + " (" + note + ")"); showTr();
-  }
-  function delTr(idx) { if (!isAdmin || !confirm("Xóa khoản này?")) return; transList.splice(idx, 1); storeData("Đã xóa 1 giao dịch"); showTr(); }
-  function showTr() {
-    var box = document.getElementById("trList"); if (!transList.length) { box.innerHTML = '<div style="text-align:center;color:#64748b">Chưa có giao dịch</div>'; return; }
-    var h = ""; transList.forEach(function(x, i) {
-      var isIn = (x.type === "in"), del = isAdmin ? '<button type="button" onclick="delTr(' + i + ')" style="background:#fee2e2;color:#dc2626;border:none;padding:4px 8px;border-radius:4px;cursor:pointer">Xóa</button>' : '';
-      h += '<div class="log-item"><div><b>' + x.note + '</b><br><small style="color:#64748b">' + x.dt + '</small></div><div><b style="color:' + (isIn ? '#16a34a' : '#dc2626') + '">' + (isIn ? '+' : '-') + money(x.amt) + '</b> ' + del + '</div></div>';
-    }); box.innerHTML = h;
-  }
-  function showDebt() {
-    var st = new Map(); NAMES.forEach(function(nm) { st.set(nm, { c: 0, p: 0, d: 0 }); });
-    dayMap.forEach(function(dObj) { var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf, n) { if (!st.has(n)) st.set(n, { c: 0, p: 0, d: 0 }); var r = st.get(n); r.c += inf.count; if (inf.paid === 1) r.p += inf.count * f; else r.d += inf.count * f; }); });
-    var h = ""; NAMES.forEach(function(nm) { var r = st.get(nm); h += '<tr><td><b>' + nm + '</b></td><td style="text-align:center">' + r.c + '</td><td style="text-align:right;color:#16a34a">' + money(r.p) + '</td><td style="text-align:right;font-weight:bold;color:' + (r.d > 0 ? '#dc2626' : '#64748b') + '">' + money(r.d) + '</td></tr>'; });
-    document.getElementById("dBody").innerHTML = h;
-  }
-  function setHonorFilter(p) {
-    honorPeriod = p; document.getElementById("fWeek").className = (p === "week") ? "filter-btn active" : "filter-btn";
-    document.getElementById("fMonth").className = (p === "month") ? "filter-btn active" : "filter-btn";
-    document.getElementById("fAll").className = (p === "all") ? "filter-btn active" : "filter-btn"; showHonor();
-  }
-  function showHonor() {
-    var sc = new Map(); NAMES.forEach(function(nm) { sc.set(nm, { name: nm, total: 0, sp: 0, mp: 0 }); });
-    dayMap.forEach(function(dObj, dt) { if (!isDateInPeriod(dt, honorPeriod)) return; var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf, n) { if (inf.paid === 1 && sc.has(n)) { var it = sc.get(n); it.mp += inf.count * f; it.total += inf.count * f; } }); });
-    transList.forEach(function(tr) { if (tr.type === "in" && tr.person && sc.has(tr.person) && isDateInPeriod(tr.dt, honorPeriod)) { var it = sc.get(tr.person); it.sp += Number(tr.amt) || 0; it.total += Number(tr.amt) || 0; } });
-    var rk = Array.from(sc.values()).filter(function(x) { return x.total > 0; }).sort(function(a, b) { return b.total - a.total; }), box = document.getElementById("honorList");
-    if (!rk.length) { box.innerHTML = '<div style="text-align:center;color:#64748b;padding:20px 0">Chưa có dữ liệu đóng góp.</div>'; return; }
-    var h = ""; rk.forEach(function(r, i) {
-      var md = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : ("#" + (i + 1)), cls = i < 3 ? ("rank-item rank-" + (i + 1)) : "rank-item", dt = new Array();
-      if (r.sp > 0) dt.push("Ủng hộ: " + money(r.sp)); if (r.mp > 0) dt.push("Nộp thua: " + money(r.mp));
-      h += '<div class="' + cls + '"><div><span style="font-size:16px;margin-right:6px">' + md + '</span><b>' + r.name + '</b><br><small style="color:#64748b">' + dt.join(" | ") + '</small></div><b style="color:#16a34a;font-size:15px">' + money(r.total) + '</b></div>';
-    }); box.innerHTML = h;
-  }
-  function copyZaloReport() {
-    var msg = "🏐 BÁO CÁO QUỸ BÓNG CHUYỀN (" + getToday() + ")\n• Đã thu: " + document.getElementById("vIn").innerText + "\n• Đã chi: " + document.getElementById("vOut").innerText + "\n• Quỹ còn lại: " + document.getElementById("vBal").innerText + "\n• Mới nhất: " + lastLog + "\n\n";
-    var dl = new Array(); dayMap.forEach(function(dObj, dt) { var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf, n) { if (inf.paid === 0) dl.push("- " + n + " (" + dt + "): " + inf.count + " trận = " + money(inf.count * f)); }); });
-    msg += dl.length ? ("📌 Chưa nộp:\n" + dl.join("\n")) : "✅ Tất cả anh em đã nộp đủ!";
-    if (navigator.clipboard) navigator.clipboard.writeText(msg).then(function() { alert("Đã copy báo cáo gửi Zalo!"); }); else alert(msg);
-  }
-  function updateTop() {
-    var tin = 0, tout = 0; dayMap.forEach(function(dObj) { var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf) { if (inf.paid === 1) tin += inf.count * f; }); });
-    transList.forEach(function(it) { if (it.type === "in") tin += Number(it.amt) || 0; else tout += Number(it.amt) || 0; });
-    document.getElementById("vIn").innerHTML = money(tin); document.getElementById("vOut").innerHTML = money(tout); document.getElementById("vBal").innerHTML = money(tin - tout);
-  }
-  var sel = document.getElementById("trPerson"); NAMES.forEach(function(n) { var o = document.createElement("option"); o.value = n; o.text = n; sel.appendChild(o); });
-  document.getElementById("mDate").value = getToday(); document.getElementById("trDate").value = getToday(); syncFromCloud(false);
-</script>
-</body>
-</html>
