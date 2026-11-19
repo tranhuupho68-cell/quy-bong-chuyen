@@ -59,75 +59,28 @@
 <body>
 <div class="header">
   <span>🏐 QUỸ BÓNG CHUYỀN</span>
-  <div class="h-btns">
-    <button type="button" class="btn-top" onclick="syncFromCloud(true)">🔄 Tải mới</button>
-    <button type="button" class="btn-top" id="btnAuth" onclick="toggleAuth()">🔒 Chỉ xem</button>
-  </div>
+  <div class="h-btns"><button type="button" class="btn-top" onclick="syncFromCloud(true)">🔄 Tải mới</button><button type="button" class="btn-top" id="btnAuth" onclick="toggleAuth()">🔒 Chỉ xem</button></div>
 </div>
-<div id="loginBar">
-  <input type="password" id="pwInput" placeholder="Mật khẩu (1111)">
-  <button type="button" style="background:#16a34a;color:#fff" onclick="doLogin()">Mở khóa</button>
-  <button type="button" style="background:#64748b;color:#fff" onclick="document.getElementById('loginBar').style.display='none'">Đóng</button>
-</div>
+<div id="loginBar"><input type="password" id="pwInput" placeholder="Mật khẩu (1111)"><button type="button" style="background:#16a34a;color:#fff" onclick="doLogin()">Mở khóa</button><button type="button" style="background:#64748b;color:#fff" onclick="document.getElementById('loginBar').style.display='none'">Đóng</button></div>
 <div id="setupBanner"></div>
 <div id="lastChangeBar">⏳ Đang kết nối kho quỹ trực tuyến...</div>
-<div class="summary">
-  <div><small>Đã Thu</small><b style="color:#16a34a" id="vIn">0đ</b></div>
-  <div><small>Đã Chi</small><b style="color:#dc2626" id="vOut">0đ</b></div>
-  <div><small>Còn Lại</small><b style="color:#1d4ed8" id="vBal">0đ</b></div>
-</div>
-<div class="tabs">
-  <button type="button" id="t1" class="active" onclick="openTab(1)">📅 Đánh Thua</button>
-  <button type="button" id="t2" onclick="openTab(2)">💰 Thu / Chi</button>
-  <button type="button" id="t3" onclick="openTab(3)">📊 Công Nợ</button>
-  <button type="button" id="t4" onclick="openTab(4)">🏆 Vinh Danh</button>
-</div>
+<div class="summary"><div><small>Đã Thu</small><b style="color:#16a34a" id="vIn">0đ</b></div><div><small>Đã Chi</small><b style="color:#dc2626" id="vOut">0đ</b></div><div><small>Còn Lại</small><b style="color:#1d4ed8" id="vBal">0đ</b></div></div>
+<div class="tabs"><button type="button" id="t1" class="active" onclick="openTab(1)">📅 Đánh Thua</button><button type="button" id="t2" onclick="openTab(2)">💰 Thu / Chi</button><button type="button" id="t3" onclick="openTab(3)">📊 Công Nợ</button><button type="button" id="t4" onclick="openTab(4)">🏆 Vinh Danh</button></div>
 <div id="p1" class="page active">
-  <div class="card">
-    <div class="row" style="margin-bottom:0">
-      <div><small style="color:#475569;display:block;margin-bottom:4px">Ngày đánh</small><input type="date" id="mDate" onchange="refreshDay()"></div>
-      <div><small style="color:#475569;display:block;margin-bottom:4px">Tiền thua/người</small><input type="number" id="mFee" value="50000" disabled onchange="updateFee()"></div>
-    </div>
-  </div>
-  <div class="card">
-    <div style="font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-      <span>Danh sách thành viên (22)</span><span id="dayInfo" style="color:#1d4ed8;font-size:12px"></span>
-    </div>
-    <div class="grid" id="mGrid"></div>
-  </div>
+  <div class="card"><div class="row" style="margin-bottom:0"><div><small style="color:#475569;display:block;margin-bottom:4px">Ngày đánh</small><input type="date" id="mDate" onchange="refreshDay()"></div><div><small style="color:#475569;display:block;margin-bottom:4px">Tiền thua/người</small><input type="number" id="mFee" value="50000" disabled onchange="updateFee()"></div></div></div>
+  <div class="card"><div style="font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center"><span>Danh sách thành viên (22)</span><span id="dayInfo" style="color:#1d4ed8;font-size:12px"></span></div><div class="grid" id="mGrid"></div></div>
 </div>
 <div id="p2" class="page">
   <div class="card" id="trFormCard" style="display:none">
-    <div class="row">
-      <div><select id="trType" onchange="toggleDonorBox()"><option value="out">Chi tiêu (Nước, sân...)</option><option value="in">Ủng hộ / Đóng quỹ</option></select></div>
-      <div><input type="number" id="trAmt" placeholder="Số tiền (VNĐ)"></div>
-    </div>
+    <div class="row"><div><select id="trType" onchange="toggleDonorBox()"><option value="out">Chi tiêu (Nước, sân...)</option><option value="in">Ủng hộ / Đóng quỹ</option></select></div><div><input type="number" id="trAmt" placeholder="Số tiền (VNĐ)"></div></div>
     <div class="row" id="donorRow" style="display:none"><div><select id="trPerson"><option value="">-- Chọn người đóng / ủng hộ --</option></select></div></div>
-    <div class="row">
-      <div><input type="date" id="trDate"></div>
-      <div><input type="text" id="trNote" placeholder="Nội dung (VD: Mua nước / Ủng hộ)"></div>
-    </div>
+    <div class="row"><div><input type="date" id="trDate"></div><div><input type="text" id="trNote" placeholder="Nội dung (VD: Mua nước / Ủng hộ)"></div></div>
     <button type="button" class="btn-save" onclick="saveTr()">+ Lưu Khoản Này</button>
   </div>
   <div class="card"><div id="trList"><div style="text-align:center;color:#64748b">Chưa có giao dịch</div></div></div>
 </div>
-<div id="p3" class="page">
-  <div class="card">
-    <button type="button" class="btn-zalo" onclick="copyZaloReport()">📋 Sao chép báo cáo gửi nhóm Zalo</button>
-    <table><thead><tr><th>Tên</th><th style="text-align:center">Thua</th><th style="text-align:right">Đã nộp</th><th style="text-align:right">Còn nợ</th></tr></thead><tbody id="dBody"></tbody></table>
-  </div>
-</div>
-<div id="p4" class="page">
-  <div class="card">
-    <div style="font-weight:bold;margin-bottom:8px;color:#1d4ed8;text-align:center">🏆 BẢNG VÀNG ĐÓNG GÓP QUỸ</div>
-    <div class="filter-bar">
-      <button type="button" id="fWeek" class="filter-btn active" onclick="setHonorFilter('week')">Tuần này</button>
-      <button type="button" id="fMonth" class="filter-btn" onclick="setHonorFilter('month')">Tháng này</button>
-      <button type="button" id="fAll" class="filter-btn" onclick="setHonorFilter('all')">Tất cả</button>
-    </div>
-    <div id="honorList"></div>
-  </div>
-</div>
+<div id="p3" class="page"><div class="card"><button type="button" class="btn-zalo" onclick="copyZaloReport()">📋 Sao chép báo cáo gửi nhóm Zalo</button><table><thead><tr><th>Tên</th><th style="text-align:center">Thua</th><th style="text-align:right">Đã nộp</th><th style="text-align:right">Còn nợ</th></tr></thead><tbody id="dBody"></tbody></table></div></div>
+<div id="p4" class="page"><div class="card"><div style="font-weight:bold;margin-bottom:8px;color:#1d4ed8;text-align:center">🏆 BẢNG VÀNG ĐÓNG GÓP QUỸ</div><div class="filter-bar"><button type="button" id="fWeek" class="filter-btn active" onclick="setHonorFilter('week')">Tuần này</button><button type="button" id="fMonth" class="filter-btn" onclick="setHonorFilter('month')">Tháng này</button><button type="button" id="fAll" class="filter-btn" onclick="setHonorFilter('all')">Tất cả</button></div><div id="honorList"></div></div></div>
 <script translate="no">
   var BIN_ID = "";
   var API_KEY = "$2a$10$2NTqyeUSdqNuaXLzZuEfkOqXEZlShaaJdAO7HNCAHMovCsngMc0UW";
@@ -135,137 +88,6 @@
   var API_BASE = "https://" + "api.jsonbin.io" + "/v3/b";
   var NAMES = "Tuấn,Thành,Tính,Hiếu,Hạnh,Phố,Anh Hiếu,Biên,Cường,Hưng,Hoàng,Sửu,Đức TL,Đức GL,Hiệp,Tấn,Huy,Đức ĐN,Nhân,Kỳ,Huỳnh,Phúc".split(",");
   var dayMap = new Map(), transList = new Array(), lastLog = "Khởi tạo sổ quỹ", honorPeriod = "week", isAdmin = false;
-
-  function activeBinId() {
-    if (BIN_ID && BIN_ID.length > 10) return BIN_ID;
-    try { var s = window.localStorage.getItem("vb22_auto_bin_id"); if (s && s.length > 10) return s; } catch (e) {}
-    return "";
-  }
+  function activeBinId() { if (BIN_ID && BIN_ID.length > 10) return BIN_ID; try { var s = window.localStorage.getItem("vb22_auto_bin_id"); if (s && s.length > 10) return s; } catch (e) {} return ""; }
   function autoCreateBin() {
-    updateLogBanner("⏳ Đang tự động tạo kho online...");
-    fetch(API_BASE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY, "X-Bin-Name": "QuyBongChuyen22", "X-Bin-Private": "false" },
-      body: JSON.stringify(packPayload())
-    }).then(function(r) { return r.json(); }).then(function(j) {
-      if (j && j.metadata && j.metadata.id) {
-        var id = j.metadata.id;
-        try { window.localStorage.setItem("vb22_auto_bin_id", id); } catch (e) {}
-        var b = document.getElementById("setupBanner"); b.style.display = "block";
-        b.innerHTML = "✅ <b>Mã BIN_ID của bạn:</b> <b style='font-size:15px;color:#dc2626;user-select:all'>" + id + "</b><br><small>Copy mã đỏ dán vào dòng <code>var BIN_ID = \"" + id + "\";</code> trên GitHub để cả đội dùng chung!</small>";
-        updateLogBanner("✅ Đã kết nối kho quỹ trực tuyến!");
-      }
-    }).catch(function() { updateLogBanner("⚠️ Đang dùng chế độ lưu trên máy."); });
-  }
-  function nowTimeStr() {
-    var d = new Date(), p = function(n) { return n < 10 ? "0" + n : n; };
-    return p(d.getHours()) + ":" + p(d.getMinutes()) + " ngày " + p(d.getDate()) + "/" + p(d.getMonth() + 1);
-  }
-  function updateLogBanner(m) { document.getElementById("lastChangeBar").innerHTML = "🔔 <b>Cập nhật mới nhất:</b> " + (m || lastLog); }
-  function toggleAuth() {
-    if (isAdmin) { isAdmin = false; applyAuthUI(); return; }
-    document.getElementById("loginBar").style.display = "flex"; document.getElementById("pwInput").value = ""; document.getElementById("pwInput").focus();
-  }
-  function doLogin() {
-    if (document.getElementById("pwInput").value.trim() === ADMIN_PASS) { isAdmin = true; document.getElementById("loginBar").style.display = "none"; applyAuthUI(); }
-    else alert("Sai mật khẩu thủ quỹ!");
-  }
-  function applyAuthUI() {
-    var btn = document.getElementById("btnAuth"); btn.innerHTML = isAdmin ? "🔓 Đang sửa" : "🔒 Chỉ xem"; btn.className = isAdmin ? "btn-top unlocked" : "btn-top";
-    document.getElementById("mFee").disabled = !isAdmin; document.getElementById("trFormCard").style.display = isAdmin ? "block" : "none";
-    refreshDay(); showTr();
-  }
-  function toggleDonorBox() { document.getElementById("donorRow").style.display = (document.getElementById("trType").value === "in") ? "flex" : "none"; }
-  function packPayload() {
-    var arr = new Array(); dayMap.forEach(function(v, k) { arr.push({ k: k, f: v.f, l: Array.from(v.l.entries()) }); });
-    return { m: arr, t: transList, log: lastLog };
-  }
-  function unpackPayload(d) {
-    if (!d) return; dayMap = new Map();
-    if (d.m && Array.isArray(d.m)) d.m.forEach(function(p) { dayMap.set(p.k, { f: p.f, l: new Map(p.l) }); });
-    transList = Array.isArray(d.t) ? d.t : new Array(); if (d.log) lastLog = d.log;
-  }
-  function storeData(txt) {
-    if (txt) { lastLog = txt + " (" + nowTimeStr() + ")"; updateLogBanner(lastLog); }
-    var pl = packPayload(); try { window.localStorage.setItem("vb22_cloud_cache", JSON.stringify(pl)); } catch (e) {} updateTop();
-    var bin = activeBinId();
-    if (bin) {
-      updateLogBanner("⏳ Đang đồng bộ...");
-      fetch(API_BASE + "/" + bin, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY }, body: JSON.stringify(pl) })
-      .then(function(r) { return r.json(); }).then(function() { updateLogBanner("✅ " + lastLog); }).catch(function() { updateLogBanner("⚠️ Lưu tạm: " + lastLog); });
-    }
-  }
-  function syncFromCloud(al) {
-    try { var c = window.localStorage.getItem("vb22_cloud_cache"); if (c) { unpackPayload(JSON.parse(c)); updateTop(); refreshDay(); } } catch (e) {}
-    var bin = activeBinId(); if (!bin) { autoCreateBin(); return; }
-    if (!BIN_ID || BIN_ID.length < 10) {
-      var b = document.getElementById("setupBanner"); b.style.display = "block";
-      b.innerHTML = "ℹ️ Mã <b>BIN_ID</b> của bạn: <b style='color:#dc2626;user-select:all'>" + bin + "</b> — Dán vào dòng <code>var BIN_ID = \"" + bin + "\";</code> trên GitHub nhé!";
-    }
-    updateLogBanner("⏳ Đang tải số liệu mới nhất...");
-    fetch(API_BASE + "/" + bin + "/latest", { method: "GET", headers: { "X-Master-Key": API_KEY } })
-    .then(function(r) { return r.json(); }).then(function(j) {
-      if (j && j.record) {
-        unpackPayload(j.record); try { window.localStorage.setItem("vb22_cloud_cache", JSON.stringify(j.record)); } catch (e) {}
-        updateTop(); refreshDay(); showTr(); showDebt(); showHonor(); updateLogBanner(lastLog);
-        if (al) alert("Đã tải dữ liệu mới nhất!");
-      }
-    }).catch(function() { updateLogBanner("⚠️ Bản lưu gần nhất: " + lastLog); });
-  }
-  function money(v) { return (Number(v) || 0).toLocaleString("vi-VN") + "đ"; }
-  function getToday() { var d = new Date(), p = function(n) { return n < 10 ? "0" + n : n; }; return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
-  function isDateInPeriod(ds, p) {
-    if (p === "all") return true; if (!ds) return false;
-    var pts = ds.split("-"), tg = new Date(Number(pts.at(0)), Number(pts.at(1)) - 1, Number(pts.at(2))), now = new Date(); now.setHours(0,0,0,0);
-    if (p === "month") return tg.getFullYear() === now.getFullYear() && tg.getMonth() === now.getMonth();
-    var dw = now.getDay(), mon = new Date(now); mon.setDate(now.getDate() + (dw === 0 ? -6 : 1 - dw));
-    var sun = new Date(mon); sun.setDate(mon.getDate() + 6); return tg >= mon && tg <= sun;
-  }
-  function openTab(n) {
-    for (var i = 1; i <= 4; i++) { document.getElementById("t" + i).className = (n === i) ? "active" : ""; document.getElementById("p" + i).className = (n === i) ? "page active" : "page"; }
-    if (n === 1) refreshDay(); if (n === 2) showTr(); if (n === 3) showDebt(); if (n === 4) showHonor();
-  }
-  function refreshDay() {
-    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt);
-    var fee = rec ? rec.f : (Number(document.getElementById("mFee").value) || 50000); document.getElementById("mFee").value = fee;
-    var losers = rec ? rec.l : new Map(), h = "", tot = 0;
-    NAMES.forEach(function(nm) {
-      var info = losers.get(nm);
-      if (info && info.count > 0) {
-        tot += info.count;
-        var cls = (info.paid === 1) ? "badge paid" : "badge unpaid", txt = (info.paid === 1) ? "Đã nộp" : "Chưa nộp";
-        var plus = isAdmin ? '<button type="button" class="btn-plus" onclick="addMatch(event,\'' + nm + '\')">+1</button>' : '';
-        h += '<div class="member lose" onclick="toggleMember(\'' + nm + '\')"><div class="m-left"><span class="chk">✓</span><span class="m-name">' + nm + (info.count > 1 ? ' <span class="m-cnt">x' + info.count + '</span>' : '') + '</span></div><div class="m-right">' + plus + '<button type="button" class="' + cls + '" onclick="togglePay(event,\'' + nm + '\')">' + txt + '</button></div></div>';
-      } else {
-        h += '<div class="member" onclick="toggleMember(\'' + nm + '\')"><div class="m-left"><span class="chk"></span><span class="m-name">' + nm + '</span></div><div class="m-right"></div></div>';
-      }
-    });
-    document.getElementById("mGrid").innerHTML = h;
-    document.getElementById("dayInfo").innerHTML = tot > 0 ? ("Tổng: " + tot + " trận") : "";
-  }
-  function toggleMember(nm) {
-    if (!isAdmin) { alert("Bấm '🔒 Chỉ xem' nhập MK 1111 để sửa!"); return; }
-    var dt = document.getElementById("mDate").value || getToday(), fee = Number(document.getElementById("mFee").value) || 50000;
-    if (!dayMap.has(dt)) dayMap.set(dt, { f: fee, l: new Map() }); var rec = dayMap.get(dt);
-    if (!rec.l.has(nm)) { rec.l.set(nm, { count: 1, paid: 0 }); storeData("Đánh dấu " + nm + " thua (" + dt + ")"); }
-    else { rec.l.delete(nm); storeData("Bỏ đánh dấu " + nm + " (" + dt + ")"); }
-    refreshDay();
-  }
-  function addMatch(ev, nm) {
-    if (ev && ev.stopPropagation) ev.stopPropagation(); if (!isAdmin) return;
-    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt); if (!rec || !rec.l.has(nm)) return;
-    var info = rec.l.get(nm); info.count += 1; rec.l.set(nm, info); storeData(nm + " thua " + info.count + " trận (" + dt + ")"); refreshDay();
-  }
-  function togglePay(ev, nm) {
-    if (ev && ev.stopPropagation) ev.stopPropagation(); if (!isAdmin) { alert("Chỉ thủ quỹ mới xác nhận được!"); return; }
-    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt); if (!rec || !rec.l.has(nm)) return;
-    var info = rec.l.get(nm); info.paid = (info.paid === 1) ? 0 : 1; rec.l.set(nm, info);
-    storeData(nm + (info.paid === 1 ? " ĐÃ NỘP (" : " CHƯA NỘP (") + info.count + " trận ngày " + dt + ")"); refreshDay();
-  }
-  function updateFee() {
-    if (!isAdmin) return; var dt = document.getElementById("mDate").value || getToday();
-    if (!dayMap.has(dt)) dayMap.set(dt, { f: 50000, l: new Map() }); dayMap.get(dt).f = Number(document.getElementById("mFee").value) || 0;
-    storeData("Đổi mức tiền ngày " + dt); refreshDay();
-  }
-  function saveTr() {
-    if (!isAdmin) return; var amt = Number(document.getElementById("trAmt").value); if (!amt || amt <= 0) { alert("Nhập số tiền!"); return; }
+    updateLogBanner("⏳ Đang tạo kho online...");
