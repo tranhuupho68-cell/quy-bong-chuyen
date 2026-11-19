@@ -57,10 +57,7 @@
 </style>
 </head>
 <body>
-<div class="header">
-  <span>🏐 QUỸ BÓNG CHUYỀN</span>
-  <div class="h-btns"><button type="button" class="btn-top" onclick="syncFromCloud(true)">🔄 Tải mới</button><button type="button" class="btn-top" id="btnAuth" onclick="toggleAuth()">🔒 Chỉ xem</button></div>
-</div>
+<div class="header"><span>🏐 QUỸ BÓNG CHUYỀN</span><div class="h-btns"><button type="button" class="btn-top" onclick="syncFromCloud(true)">🔄 Tải mới</button><button type="button" class="btn-top" id="btnAuth" onclick="toggleAuth()">🔒 Chỉ xem</button></div></div>
 <div id="loginBar"><input type="password" id="pwInput" placeholder="Mật khẩu (1111)"><button type="button" style="background:#16a34a;color:#fff" onclick="doLogin()">Mở khóa</button><button type="button" style="background:#64748b;color:#fff" onclick="document.getElementById('loginBar').style.display='none'">Đóng</button></div>
 <div id="setupBanner"></div>
 <div id="lastChangeBar">⏳ Đang kết nối kho quỹ trực tuyến...</div>
@@ -85,9 +82,149 @@
   var BIN_ID = "";
   var API_KEY = "$2a$10$2NTqyeUSdqNuaXLzZuEfkOqXEZlShaaJdAO7HNCAHMovCsngMc0UW";
   var ADMIN_PASS = "1111";
-  var API_BASE = "https://" + "api.jsonbin.io" + "/v3/b";
+  var API_BASE = ["https:/", "api.jsonbin.io", "v3", "b"].join("/");
   var NAMES = "Tuấn,Thành,Tính,Hiếu,Hạnh,Phố,Anh Hiếu,Biên,Cường,Hưng,Hoàng,Sửu,Đức TL,Đức GL,Hiệp,Tấn,Huy,Đức ĐN,Nhân,Kỳ,Huỳnh,Phúc".split(",");
-  var dayMap = new Map(), transList = new Array(), lastLog = "Khởi tạo sổ quỹ", honorPeriod = "week", isAdmin = false;
-  function activeBinId() { if (BIN_ID && BIN_ID.length > 10) return BIN_ID; try { var s = window.localStorage.getItem("vb22_auto_bin_id"); if (s && s.length > 10) return s; } catch (e) {} return ""; }
+  var dayMap = new Map(), transList = [], lastLog = "Khởi tạo sổ quỹ", honorPeriod = "week", isAdmin = false;
+
+  function activeBinId() {
+    if (BIN_ID && BIN_ID.length > 10) return BIN_ID;
+    try { var s = localStorage.getItem("vb22_auto_bin_id"); if (s && s.length > 10) return s; } catch (e) {}
+    return "";
+  }
   function autoCreateBin() {
     updateLogBanner("⏳ Đang tạo kho online...");
+    fetch(API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY, "X-Bin-Name": "QuyBongChuyen22", "X-Bin-Private": "false" },
+      body: JSON.stringify(packPayload())
+    }).then(function(r) { return r.json(); }).then(function(j) {
+      if (j && j.metadata && j.metadata.id) {
+        var id = j.metadata.id;
+        try { localStorage.setItem("vb22_auto_bin_id", id); } catch (e) {}
+        var b = document.getElementById("setupBanner"); b.style.display = "block";
+        b.innerHTML = "✅ <b>Mã BIN_ID của bạn:</b> <b style='font-size:15px;color:#dc2626;user-select:all'>" + id + "</b><br><small>Copy mã đỏ dán vào dòng <code>var BIN_ID = \"" + id + "\";</code> trên GitHub để cả đội dùng chung!</small>";
+        updateLogBanner("✅ Đã kết nối kho quỹ trực tuyến!");
+      }
+    }).catch(function() { updateLogBanner("⚠️ Đang lưu tạm trên máy."); });
+  }
+  function nowTimeStr() {
+    var d = new Date(), p = function(n) { return n < 10 ? "0" + n : n; };
+    return p(d.getHours()) + ":" + p(d.getMinutes()) + " ngày " + p(d.getDate()) + "/" + p(d.getMonth() + 1);
+  }
+  function updateLogBanner(m) { document.getElementById("lastChangeBar").innerHTML = "🔔 <b>Cập nhật mới nhất:</b> " + (m || lastLog); }
+  function toggleAuth() {
+    if (isAdmin) { isAdmin = false; applyAuthUI(); return; }
+    document.getElementById("loginBar").style.display = "flex"; document.getElementById("pwInput").value = ""; document.getElementById("pwInput").focus();
+  }
+  function doLogin() {
+    if (document.getElementById("pwInput").value.trim() === ADMIN_PASS) { isAdmin = true; document.getElementById("loginBar").style.display = "none"; applyAuthUI(); }
+    else alert("Sai mật khẩu thủ quỹ!");
+  }
+  function applyAuthUI() {
+    var btn = document.getElementById("btnAuth"); btn.innerHTML = isAdmin ? "🔓 Đang sửa" : "🔒 Chỉ xem"; btn.className = isAdmin ? "btn-top unlocked" : "btn-top";
+    document.getElementById("mFee").disabled = !isAdmin; document.getElementById("trFormCard").style.display = isAdmin ? "block" : "none";
+    refreshDay(); showTr();
+  }
+  function toggleDonorBox() { document.getElementById("donorRow").style.display = (document.getElementById("trType").value === "in") ? "flex" : "none"; }
+  function packPayload() {
+    var arr = []; dayMap.forEach(function(v, k) { arr.push({ k: k, f: v.f, l: Array.from(v.l.entries()) }); });
+    return { m: arr, t: transList, log: lastLog };
+  }
+  function unpackPayload(d) {
+    if (!d) return; dayMap = new Map();
+    if (d.m && Array.isArray(d.m)) d.m.forEach(function(p) { dayMap.set(p.k, { f: p.f, l: new Map(p.l) }); });
+    transList = Array.isArray(d.t) ? d.t : []; if (d.log) lastLog = d.log;
+  }
+  function storeData(txt) {
+    if (txt) { lastLog = txt + " (" + nowTimeStr() + ")"; updateLogBanner(lastLog); }
+    var pl = packPayload(); try { localStorage.setItem("vb22_cloud_cache", JSON.stringify(pl)); } catch (e) {} updateTop();
+    var bin = activeBinId();
+    if (bin) {
+      updateLogBanner("⏳ Đang đồng bộ...");
+      fetch(API_BASE + "/" + bin, { method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY }, body: JSON.stringify(pl) })
+      .then(function(r) { return r.json(); }).then(function() { updateLogBanner("✅ " + lastLog); }).catch(function() { updateLogBanner("⚠️ Lưu tạm: " + lastLog); });
+    }
+  }
+  function syncFromCloud(al) {
+    try { var c = localStorage.getItem("vb22_cloud_cache"); if (c) { unpackPayload(JSON.parse(c)); updateTop(); refreshDay(); } } catch (e) {}
+    var bin = activeBinId(); if (!bin) { autoCreateBin(); return; }
+    if (!BIN_ID || BIN_ID.length < 10) {
+      var b = document.getElementById("setupBanner"); b.style.display = "block";
+      b.innerHTML = "ℹ️ Mã <b>BIN_ID</b> của bạn: <b style='color:#dc2626;user-select:all'>" + bin + "</b> — Dán vào dòng <code>var BIN_ID = \"" + bin + "\";</code> trên GitHub nhé!";
+    }
+    updateLogBanner("⏳ Đang tải số liệu mới nhất...");
+    fetch(API_BASE + "/" + bin + "/latest", { method: "GET", headers: { "X-Master-Key": API_KEY } }).then(function(r) { return r.json(); }).then(function(j) {
+      if (j && j.record) {
+        unpackPayload(j.record); try { localStorage.setItem("vb22_cloud_cache", JSON.stringify(j.record)); } catch (e) {}
+        updateTop(); refreshDay(); showTr(); showDebt(); showHonor(); updateLogBanner(lastLog); if (al) alert("Đã tải dữ liệu mới nhất!");
+      }
+    }).catch(function() { updateLogBanner("⚠️ Bản lưu gần nhất: " + lastLog); });
+  }
+  function money(v) { return (Number(v) || 0).toLocaleString("vi-VN") + "đ"; }
+  function getToday() { var d = new Date(), p = function(n) { return n < 10 ? "0" + n : n; }; return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+  function isDateInPeriod(ds, p) {
+    if (p === "all") return true; if (!ds) return false;
+    var pts = ds.split("-"), tg = new Date(Number(pts[0]), Number(pts[1]) - 1, Number(pts[2])), now = new Date(); now.setHours(0,0,0,0);
+    if (p === "month") return tg.getFullYear() === now.getFullYear() && tg.getMonth() === now.getMonth();
+    var dw = now.getDay(), mon = new Date(now); mon.setDate(now.getDate() + (dw === 0 ? -6 : 1 - dw));
+    var sun = new Date(mon); sun.setDate(mon.getDate() + 6); return tg >= mon && tg <= sun;
+  }
+  function openTab(n) {
+    for (var i = 1; i <= 4; i++) { document.getElementById("t" + i).className = (n === i) ? "active" : ""; document.getElementById("p" + i).className = (n === i) ? "page active" : "page"; }
+    if (n === 1) refreshDay(); if (n === 2) showTr(); if (n === 3) showDebt(); if (n === 4) showHonor();
+  }
+  function refreshDay() {
+    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt), fee = rec ? rec.f : (Number(document.getElementById("mFee").value) || 50000); document.getElementById("mFee").value = fee;
+    var losers = rec ? rec.l : new Map(), h = "", tot = 0;
+    NAMES.forEach(function(nm) {
+      var info = losers.get(nm);
+      if (info && info.count > 0) {
+        tot += info.count; var cls = (info.paid === 1) ? "badge paid" : "badge unpaid", txt = (info.paid === 1) ? "Đã nộp" : "Chưa nộp", plus = isAdmin ? '<button type="button" class="btn-plus" onclick="addMatch(event,\'' + nm + '\')">+1</button>' : '';
+        h += '<div class="member lose" onclick="toggleMember(\'' + nm + '\')"><div class="m-left"><span class="chk">✓</span><span class="m-name">' + nm + (info.count > 1 ? ' <span class="m-cnt">x' + info.count + '</span>' : '') + '</span></div><div class="m-right">' + plus + '<button type="button" class="' + cls + '" onclick="togglePay(event,\'' + nm + '\')">' + txt + '</button></div></div>';
+      } else { h += '<div class="member" onclick="toggleMember(\'' + nm + '\')"><div class="m-left"><span class="chk"></span><span class="m-name">' + nm + '</span></div><div class="m-right"></div></div>'; }
+    });
+    document.getElementById("mGrid").innerHTML = h; document.getElementById("dayInfo").innerHTML = tot > 0 ? ("Tổng: " + tot + " trận") : "";
+  }
+  function toggleMember(nm) {
+    if (!isAdmin) { alert("Bấm '🔒 Chỉ xem' nhập MK 1111 để sửa!"); return; }
+    var dt = document.getElementById("mDate").value || getToday(), fee = Number(document.getElementById("mFee").value) || 50000;
+    if (!dayMap.has(dt)) dayMap.set(dt, { f: fee, l: new Map() }); var rec = dayMap.get(dt);
+    if (!rec.l.has(nm)) { rec.l.set(nm, { count: 1, paid: 0 }); storeData("Đánh dấu " + nm + " thua (" + dt + ")"); }
+    else { rec.l.delete(nm); storeData("Bỏ đánh dấu " + nm + " (" + dt + ")"); }
+    refreshDay();
+  }
+  function addMatch(ev, nm) {
+    if (ev && ev.stopPropagation) ev.stopPropagation(); if (!isAdmin) return;
+    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt); if (!rec || !rec.l.has(nm)) return;
+    var info = rec.l.get(nm); info.count += 1; rec.l.set(nm, info); storeData(nm + " thua " + info.count + " trận (" + dt + ")"); refreshDay();
+  }
+  function togglePay(ev, nm) {
+    if (ev && ev.stopPropagation) ev.stopPropagation(); if (!isAdmin) { alert("Chỉ thủ quỹ mới xác nhận được!"); return; }
+    var dt = document.getElementById("mDate").value || getToday(), rec = dayMap.get(dt); if (!rec || !rec.l.has(nm)) return;
+    var info = rec.l.get(nm); info.paid = (info.paid === 1) ? 0 : 1; rec.l.set(nm, info);
+    storeData(nm + (info.paid === 1 ? " ĐÃ NỘP (" : " CHƯA NỘP (") + info.count + " trận ngày " + dt + ")"); refreshDay();
+  }
+  function updateFee() {
+    if (!isAdmin) return; var dt = document.getElementById("mDate").value || getToday();
+    if (!dayMap.has(dt)) dayMap.set(dt, { f: 50000, l: new Map() }); dayMap.get(dt).f = Number(document.getElementById("mFee").value) || 0;
+    storeData("Đổi mức tiền ngày " + dt); refreshDay();
+  }
+  function saveTr() {
+    if (!isAdmin) return; var amt = Number(document.getElementById("trAmt").value); if (!amt || amt <= 0) { alert("Nhập số tiền!"); return; }
+    var type = document.getElementById("trType").value, person = (type === "in") ? document.getElementById("trPerson").value : "", dt = document.getElementById("trDate").value || getToday(), raw = document.getElementById("trNote").value.trim();
+  function copyZaloReport() {
+    var msg = "🏐 BÁO CÁO QUỸ BÓNG CHUYỀN (" + getToday() + ")\n• Đã thu: " + document.getElementById("vIn").innerText + "\n• Đã chi: " + document.getElementById("vOut").innerText + "\n• Quỹ còn lại: " + document.getElementById("vBal").innerText + "\n• Mới nhất: " + lastLog + "\n\n";
+    var dl = []; dayMap.forEach(function(dObj, dt) { var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf, n) { if (inf.paid === 0) dl.push("- " + n + " (" + dt + "): " + inf.count + " trận = " + money(inf.count * f)); }); });
+    msg += dl.length ? ("📌 Chưa nộp:\n" + dl.join("\n")) : "✅ Tất cả anh em đã nộp đủ!";
+    if (navigator.clipboard) navigator.clipboard.writeText(msg).then(function() { alert("Đã copy báo cáo gửi Zalo!"); }); else alert(msg);
+  }
+  function updateTop() {
+    var tin = 0, tout = 0; dayMap.forEach(function(dObj) { var f = Number(dObj.f) || 0; dObj.l.forEach(function(inf) { if (inf.paid === 1) tin += inf.count * f; }); });
+    transList.forEach(function(it) { if (it.type === "in") tin += Number(it.amt) || 0; else tout += Number(it.amt) || 0; });
+    document.getElementById("vIn").innerHTML = money(tin); document.getElementById("vOut").innerHTML = money(tout); document.getElementById("vBal").innerHTML = money(tin - tout);
+  }
+  var sel = document.getElementById("trPerson"); NAMES.forEach(function(n) { var o = document.createElement("option"); o.value = n; o.text = n; sel.appendChild(o); });
+  document.getElementById("mDate").value = getToday(); document.getElementById("trDate").value = getToday(); syncFromCloud(false);
+</script>
+</body>
+</html>
